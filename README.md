@@ -21,14 +21,14 @@ The controller builds a city-specific cache key and calls `GetOrCreateAsync`. Hy
 
 ```mermaid
 flowchart LR
-    Client[HTTP client] -->|GET /api/Weather/{city}| API[ASP.NET Core API]
+    Client[HTTP client] -->|GET weather by city| API[ASP.NET Core API]
     API --> Controller[WeatherController]
-    Controller -->|GetOrCreateAsync weather_{city}| Hybrid[HybridCache]
+    Controller -->|GetOrCreateAsync weather_city| Hybrid[HybridCache]
     Hybrid -->|Check local cache| L1[(In-process memory cache)]
     L1 -->|Miss| L2[(Redis distributed cache)]
     L2 -->|Miss| Factory[Forecast factory]
     Factory -->|Simulated upstream call| Source[FetchWeatherFromApi]
-    Source -->|WeatherForecast| Hybrid
+    Source -->|Weather forecast| Hybrid
     Hybrid -->|Populate configured cache layers| L2
     Hybrid -->|Return forecast| Controller
     Controller -->|JSON response| Client
@@ -49,9 +49,9 @@ sequenceDiagram
     participant L2 as Redis distributed cache
     participant Factory as Forecast factory
 
-    Client->>API: GET /api/Weather/{city}
+    Client->>API: GET weather by city
     API->>Controller: Route request to GetWeather(city)
-    Controller->>Controller: Build key weather_{city}
+    Controller->>Controller: Build key weather_city
     Controller->>Hybrid: GetOrCreateAsync(key, factory)
     Hybrid->>L1: Look up key
     alt Local cache hit
